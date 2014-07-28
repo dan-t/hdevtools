@@ -27,6 +27,7 @@ defaultSocketFile = ".hdevtools.sock"
 fileArg :: HDevTools -> Maybe String
 fileArg (Admin {})      = Nothing
 fileArg (ModuleFile {}) = Nothing
+fileArg (FindSymbol {}) = Nothing
 fileArg args@(Check {}) = Just $ file args
 fileArg args@(Info  {}) = Just $ file args
 fileArg args@(Type  {}) = Just $ file args
@@ -51,6 +52,7 @@ main = do
         ModuleFile {} -> doModuleFile sock args extra
         Info {} -> doInfo sock args extra
         Type {} -> doType sock args extra
+        FindSymbol {} -> doFindSymbol sock args extra
 
 doAdmin :: FilePath -> HDevTools -> CommandExtra -> IO ()
 doAdmin sock args _extra
@@ -92,3 +94,7 @@ doInfo = doFileCommand "info" $
 doType :: FilePath -> HDevTools -> CommandExtra -> IO ()
 doType = doFileCommand "type" $
     \args -> CmdType (file args) (line args, col args)
+
+doFindSymbol :: FilePath -> HDevTools -> CommandExtra -> IO ()
+doFindSymbol sock args =
+    serverCommand sock (CmdFindSymbol (symbol args) (files args))
